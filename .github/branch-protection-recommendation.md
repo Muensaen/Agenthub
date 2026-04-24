@@ -17,6 +17,13 @@ Add these checks from workflow `Test Web`:
 - `smoke`
 - `full`
 
+Copy-paste ready list for GitHub UI:
+
+```text
+smoke
+full
+```
+
 ## Why
 - `smoke` keeps PR feedback fast for core user journeys.
 - `full` enforces deeper E2E coverage (admin + comment/vote lifecycle).

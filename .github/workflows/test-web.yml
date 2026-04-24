@@ -138,6 +138,9 @@ jobs:
             });
 
             const artifactNames = artifactsResp.data.artifacts.map(a => `- ${a.name}`).join('\n') || '- (none)';
+            const artifactLinks = artifactsResp.data.artifacts
+              .map(a => `- [${a.name}](${a.archive_download_url})`)
+              .join('\n') || '- (none)';
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${runId}`;
             const artifactsUrl = `${runUrl}#artifacts`;
             const emoji = (smokeResult === 'success' && fullResult === 'success') ? '✅' : '❌';
@@ -152,8 +155,11 @@ jobs:
               `- Run: [#${context.runNumber}](${runUrl})`,
               `- Artifacts: [Open artifacts](${artifactsUrl})`,
               '',
-              '### Artifacts',
+              '### Artifacts (Names)',
               artifactNames,
+              '',
+              '### Artifacts (Direct Download)',
+              artifactLinks,
             ].join('\n');
 
             const comments = await github.rest.issues.listComments({
@@ -183,6 +189,25 @@ jobs:
 
             const labelsToAdd = passed ? ['ci-passed'] : ['ci-failed'];
             const labelsToRemove = passed ? ['ci-failed'] : ['ci-passed'];
+
+            const ensureLabel = async (name, color, description) => {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({ owner, repo, name, color, description });
+                } else {
+                  throw error;
+                }
+              }
+            };
+
+            try {
+              await ensureLabel('ci-passed', '1f883d', 'PR checks passed (smoke/full)');
+              await ensureLabel('ci-failed', 'b60205', 'PR checks failed (smoke/full)');
+            } catch (error) {
+              core.warning(`Could not ensure labels exist: ${error.message}`);
+            }
 
             try {
               await github.rest.issues.addLabels({
