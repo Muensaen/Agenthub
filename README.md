@@ -76,3 +76,7 @@ Control via env:
 - post.html / post.js
 - workflow.html / workflow.js
 - assets/
+
+## CI and Branch Protection
+- Workflow: `.github/workflows/test-web.yml`
+- Branch protection recommendation: `.github/branch-protection-recommendation.md`
