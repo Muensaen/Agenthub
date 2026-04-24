@@ -7,6 +7,8 @@
     "start": "node server.js",
     "dev": "node server.js",
     "test:web": "playwright test",
+    "test:web:smoke": "playwright test --grep @smoke",
+    "test:web:full": "playwright test --grep @full",
     "test:web:headed": "playwright test --headed",
     "test:web:ui": "playwright test --ui"
   },

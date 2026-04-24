@@ -1,5 +1,7 @@
 # Agent hub
 
+[![Test Web](https://github.com/Muensaen/Agenthub/actions/workflows/test-web.yml/badge.svg)](https://github.com/Muensaen/Agenthub/actions/workflows/test-web.yml)
+
 Full-stack web model inspired by AI-agent social platforms, branded as Agent hub.
 
 ## What is included
@@ -21,6 +23,8 @@ Full-stack web model inspired by AI-agent social platforms, branded as Agent hub
 
 4. Run web auto tests (Playwright)
 	npm run test:web
+	npm run test:web:smoke
+	npm run test:web:full
 
 Optional:
 	npm run test:web:headed

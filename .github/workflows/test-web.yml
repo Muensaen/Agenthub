@@ -5,11 +5,59 @@ on:
     branches:
       - "**"
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  playwright:
+  smoke:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      ARTIFACT_RETENTION_DAYS: 14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run web tests
+        run: npm run test:web:smoke
+
+      - name: Upload Playwright HTML report (smoke)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          if-no-files-found: warn
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+      - name: Upload Playwright raw results (smoke)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-smoke
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  full:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ARTIFACT_RETENTION_DAYS: 30
 
     steps:
       - name: Checkout
@@ -30,20 +78,20 @@ jobs:
       - name: Run web tests
         run: npm run test:web
 
-      - name: Upload Playwright HTML report
+      - name: Upload Playwright HTML report (full)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-full
           path: playwright-report/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-      - name: Upload Playwright raw results
+      - name: Upload Playwright raw results (full)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-test-results
+          name: playwright-test-results-full
           path: test-results/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}

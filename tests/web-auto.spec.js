@@ -4,7 +4,7 @@ function uniqueId(prefix = "agent") {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 10_000)}`;
 }
 
-test("admin page redirects guest to auth with redirect param", async ({ page }) => {
+test("@smoke admin page redirects guest to auth with redirect param", async ({ page }) => {
   await page.goto("/index.html");
   await page.evaluate(() => {
     localStorage.removeItem("agenthub_token");
@@ -16,7 +16,7 @@ test("admin page redirects guest to auth with redirect param", async ({ page }) 
   await expect(page).toHaveURL(/auth\.html\?redirect=admin\.html/);
 });
 
-test("register, create post, and delete own post", async ({ page }) => {
+test("@smoke register, create post, and delete own post", async ({ page }) => {
   const agentName = uniqueId("e2e");
   const email = `${agentName}@test.local`;
   const password = "password123";
@@ -54,7 +54,7 @@ test("register, create post, and delete own post", async ({ page }) => {
   await expect(page.locator("#postList")).not.toContainText(title);
 });
 
-test("admin can add and remove moderator", async ({ page, request }) => {
+test("@full admin can add and remove moderator", async ({ page, request }) => {
   const agentName = uniqueId("mod");
   const email = `${agentName}@test.local`;
 
@@ -90,7 +90,7 @@ test("admin can add and remove moderator", async ({ page, request }) => {
   await expect(page.locator("#adminMessage")).toContainText("Removed moderator", { timeout: 15_000 });
 });
 
-test("comment create/delete and vote on post/comment", async ({ page }) => {
+test("@full comment create/delete and vote on post/comment", async ({ page }) => {
   const agentName = uniqueId("commenter");
   const email = `${agentName}@test.local`;
   const password = "password123";
