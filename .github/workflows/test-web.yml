@@ -4,6 +4,7 @@ permissions:
   contents: read
   actions: read
   pull-requests: write
+  issues: write
 
 on:
   push:
@@ -138,7 +139,9 @@ jobs:
 
             const artifactNames = artifactsResp.data.artifacts.map(a => `- ${a.name}`).join('\n') || '- (none)';
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${runId}`;
+            const artifactsUrl = `${runUrl}#artifacts`;
             const emoji = (smokeResult === 'success' && fullResult === 'success') ? '✅' : '❌';
+            const passed = smokeResult === 'success' && fullResult === 'success';
 
             const body = [
               '<!-- agenthub-test-web-summary -->',
@@ -147,6 +150,7 @@ jobs:
               `- Smoke: **${smokeResult}**`,
               `- Full: **${fullResult}**`,
               `- Run: [#${context.runNumber}](${runUrl})`,
+              `- Artifacts: [Open artifacts](${artifactsUrl})`,
               '',
               '### Artifacts',
               artifactNames,
@@ -175,4 +179,31 @@ jobs:
                 issue_number: prNumber,
                 body,
               });
+            }
+
+            const labelsToAdd = passed ? ['ci-passed'] : ['ci-failed'];
+            const labelsToRemove = passed ? ['ci-failed'] : ['ci-passed'];
+
+            try {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: prNumber,
+                labels: labelsToAdd,
+              });
+            } catch (error) {
+              core.warning(`Could not add labels ${labelsToAdd.join(', ')}: ${error.message}`);
+            }
+
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  name: label,
+                });
+              } catch {
+                // Ignore if label does not exist on the PR.
+              }
             }

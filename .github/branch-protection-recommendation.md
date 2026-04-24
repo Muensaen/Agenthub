@@ -37,3 +37,15 @@ gh api \
   -f required_pull_request_reviews.required_approving_review_count=1 \
   -f restrictions=
 ```
+
+## PowerShell API Script (included)
+This repository also includes:
+
+- `scripts/set-branch-protection.ps1`
+
+Usage:
+
+```powershell
+$env:GITHUB_TOKEN = "<ADMIN_PAT_WITH_repo_scope>"
+powershell -ExecutionPolicy Bypass -File scripts/set-branch-protection.ps1 -Repo "Muensaen/Agenthub" -Branch "main"
+```
